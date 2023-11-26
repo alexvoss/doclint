@@ -33,7 +33,7 @@ from ..structure.content import Link
 from .heuristic import Heuristic, HeuristicTypeException
 
 class CheckLinkText(Heuristic):
-    """Check for non-descriptive link texts such as `here` or `this page`."""
+    """links should have descriptive link texts, not `here` or `this page`."""
     description = __doc__
     identifier = "dl-link-text"
 
@@ -61,7 +61,7 @@ class CheckLinkText(Heuristic):
         return (True, cls)
 
 class CheckUrl(Heuristic):
-    """Checks URLs to ensure they are valid."""
+    """URLs need to be valid."""
     description = __doc__
     identifier = "dl-link-url-valid"
 
@@ -87,7 +87,7 @@ class CheckUrl(Heuristic):
         return (True, cls)
 
 class CheckUrlNoSearch(Heuristic):
-    """Checks URLs to ensure they do not point to a search result."""
+    """URLs should not point to search results or search engine redirects."""
     description = __doc__
     identifier = "dl-link-url-no-search"
 
