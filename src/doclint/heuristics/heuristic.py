@@ -32,7 +32,7 @@ of being hard-coded into reports.
 from __future__ import annotations
 from abc import ABC, abstractmethod
 
-baseurl = "https://corealisation.github.io/doclint/heuristics/"
+BASEURL = "https://corealisation.github.io/doclint/heuristics/"
 
 class Heuristic(ABC):
     """
@@ -45,20 +45,23 @@ class Heuristic(ABC):
     description: str
     url: str
 
-    @staticmethod
-    def applies_to(item) -> bool:
+    @classmethod
+    @abstractmethod
+    def applies_to(cls, item) -> bool:
         """
         Checks if the heuristic can be applied to the given `item`.
         """
 
-    @staticmethod
-    def applies_to_types() -> bool:
+    @classmethod
+    @abstractmethod
+    def applies_to_types(cls) -> bool:
         """
         Returns a list of types the heuristic can be applied to.
         """
 
-    @staticmethod
-    def passes(item) -> bool:
+    @classmethod
+    @abstractmethod
+    def passes(cls, item) -> bool:
         """
         A generic method that can apply the heuristic to any given item passed
         in. It is up to the caller to check if the `item` passed in is of a type
@@ -67,12 +70,12 @@ class Heuristic(ABC):
         `item`.
         """
 
-    @staticmethod
-    def url() -> str:
+    @classmethod
+    def url(cls) -> str:
         """
         Return the URL for the documentation of this heuristic.
         """
-        return baseurl+id
+        return BASEURL+cls.identifier
 
 class HeuristicTypeException(Exception):
     """
