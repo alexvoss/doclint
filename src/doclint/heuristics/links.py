@@ -54,6 +54,7 @@ class CheckLinkText(Heuristic):
 
         link = item
         if re.fullmatch(r"\Where\W", link.text) \
+            or re.fullmatch(r"^here$", link.text) \
             or link.text == "this link" \
             or link.text == "this page":
             return (False, cls)
