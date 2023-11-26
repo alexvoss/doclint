@@ -163,4 +163,6 @@ cython_debug/
 # one specifically for testing purposes
 tests/system/olx
 
+.DS_Store
+output
 *~
