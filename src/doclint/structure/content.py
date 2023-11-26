@@ -1,0 +1,93 @@
+# =============================================================================
+# MIT License
+#
+# Copyright (c) 2023 Alexander Voss
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+# =============================================================================
+
+"""
+Abstract base class for defining content in the documentation.
+"""
+
+from __future__ import annotations
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from bs4 import BeautifulSoup
+from doclint.structure import navigation
+
+@dataclass
+class Content(ABC):
+    """
+    A base class for representing content of different kinds.
+    """
+
+    parent: navigation.NavLevel
+
+    @abstractmethod
+    def links(self) -> list[Link]:
+        """
+        Return any links contained in the content.
+        """
+
+    @abstractmethod
+    def text(self) -> list[Text]:
+        """
+        Return a list of the text elements in the content.
+        """
+
+@dataclass
+class HTMLContent(Content):
+    """
+    HTML content parsed by BeautifulSoup.
+    """
+
+    content: BeautifulSoup
+
+    def links(self) -> list[Link]:
+        links = []
+        for link in self.content.find_all('a', recursive=True):
+            links.append(Link(
+                text = link.get_text(),
+                url = link.get('href'),
+                attrs = link.attrs
+            ))
+        return links
+
+    def text(self) -> list[Text]:
+        return [] # TODO
+
+
+@dataclass
+class Link:
+    """
+    A link with the URL, link text and any attributes.
+    """
+    text: str
+    url: str
+    attrs: dict[str]
+
+
+@dataclass
+class Text:
+    """
+    A chunk of text in the content. Could be anyting from a single letter to
+    a paragraph or even a whole text.
+    """
+    text: str
