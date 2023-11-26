@@ -28,6 +28,7 @@ Heuristics for Links.
 
 import re
 
+from urllib.parse import urlparse
 from ..structure.content import Link
 from .heuristic import Heuristic, HeuristicTypeException
 
@@ -55,22 +56,34 @@ class CheckLinkText(Heuristic):
         if re.fullmatch(r"\Where\W", link.text) \
             or link.text == "this link" \
             or link.text == "this page":
-            return (False, cls.identifier)
-        return (True, cls.identifier)
+            return (False, cls)
+        return (True, cls)
 
-# class CheckUrl(Heuristic):
-#     """Checks URLs to ensure they are valid."""
-#     description = __doc__
-#     id = "dl-link-url-valid"
+class CheckUrl(Heuristic):
+    """Checks URLs to ensure they are valid."""
+    description = __doc__
+    identifier = "dl-link-url-valid"
 
-#     def applies_to(item) -> bool:
-#         return isinstance(item, Link)
+    @classmethod
+    def applies_to(cls, item) -> bool:
+        return isinstance(item, Link)
 
-#     def applies_to_types() -> bool:
-#         return [Link]
+    @classmethod
+    def applies_to_types(cls) -> bool:
+        return [Link]
 
-#     def passes(link: Link) -> (bool, str):
-#         urllib.parse.
+    @classmethod
+    def passes(cls, item: Link) -> (bool, str):
+        if not isinstance(item, Link):
+            raise HeuristicTypeException(
+                f"heuristic {cls.identifier} does not operate on {type(item)}"
+            )
+        link = item
+        try:
+            urlparse(link.url)
+        except ValueError:
+            return (False, cls)
+        return (True, cls)
 
 class CheckUrlNoSearch(Heuristic):
     """Checks URLs to ensure they do not point to a search result."""
@@ -95,5 +108,5 @@ class CheckUrlNoSearch(Heuristic):
         link = item
         if link.url.startswith('https://www.google.com/search') \
             or link.url.startswith('https://www.google.com/url'):
-            return (False, cls.identifier)
-        return (True,  cls.identifier)
+            return (False, cls)
+        return (True,  cls)
