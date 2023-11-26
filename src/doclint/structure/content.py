@@ -27,10 +27,12 @@ Abstract base class for defining content in the documentation.
 """
 
 from __future__ import annotations
+
+import typing
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from bs4 import BeautifulSoup
-from doclint.structure import navigation
+
 
 @dataclass
 class Content(ABC):
@@ -38,7 +40,7 @@ class Content(ABC):
     A base class for representing content of different kinds.
     """
 
-    parent: navigation.NavLevel
+    parent: typing.Any # avoiding circular import with navigation
 
     @abstractmethod
     def links(self) -> list[Link]:
