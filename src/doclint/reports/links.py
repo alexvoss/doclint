@@ -73,7 +73,9 @@ def check_links(links: list[Link], parent: NavLevel):
         if success:
             console.print(f"✅ {link.text} -> {link.url}")
         else:
-            console.print(f"❌ {link.text} -> {link.url} ({', '.join(failures)})")
+            console.print(f"❌ {link.text} -> {link.url}")
+            for failure in failures:
+                console.print(f"   [red]{failure.identifier}: {failure.description}[/red]")
 
 
 def check_link(link: Link) -> (bool, list[str]):
