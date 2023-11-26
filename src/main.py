@@ -36,6 +36,8 @@ The tool comes with a number of integrations. Supported at the moment are:
 
 """
 
+# TODO: move some of this functionality into the doclint package.
+
 import importlib
 import sys
 
@@ -71,11 +73,11 @@ def main():
             run_report(report, data, output)
 
 
-def read_data(type: str, docdir: Path):
+def read_data(datatype: str, docdir: Path):
     """
     Load data from the docdir provided using the given document loader
     """
-    modname = 'doclint.datatypes.'+type
+    modname = 'doclint.datatypes.'+datatype
     importlib.import_module(modname)
     dataloader = sys.modules[modname]
     return dataloader.load(docdir)
@@ -107,13 +109,29 @@ def print_report_help(report: str):
 
 def check_args(args):
     """
-    Checks that the arguments provided are valid.
+    Checks that the arguments provided are valid. The aim of including this
+    explicit step is to be able to provide nice, user-friendly output when
+    something goes wrong and to do this at the earliest point possible.
     """
     check_type(args)
+    check_report(args)
 
 
 def check_type(args):
-    type = args.type
+    """
+    Checks that the `-t/--type` argument matches a module under
+    `doclint.datatypes`.
+    """
+    # TODO: implement this check
+    datatype = args.type
+
+def check_report(args):
+    """
+    Checks that the `report` arguments match modules under `doctlint.reports`.
+    """
+    # TODO: implement this check
+    for report in args.report:
+        pass
 
 
 # if run as a script, call main()
