@@ -54,7 +54,8 @@ class CheckNavSectionLength(Heuristic):
         if not cls.applies_to(item):
             raise HeuristicTypeException(cls, item)
         nav_level = item
-        if len(nav_level.children()) > 7 and nav_level.get_depth() > 1:
+        if len(nav_level.children()) > 7 \
+            and nav_level.get_depth() > 1: # ignore the top level
             return False
         return True
 
