@@ -349,4 +349,4 @@ def parse_xml(file: Path):
     with open(file, 'r', encoding='utf-8') as fd:
         xml = fd.read()
 
-    return etree.fromstring(xml)
+    return etree.fromstring(text = xml, parser = None)
