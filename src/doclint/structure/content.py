@@ -28,7 +28,7 @@ Abstract base class for defining content in the documentation.
 
 from __future__ import annotations
 
-import typing
+from typing import Any, Sequence
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from bs4 import BeautifulSoup
@@ -40,7 +40,7 @@ class Content(ABC):
     A base class for representing content of different kinds.
     """
 
-    parent: typing.Any # avoiding circular import with navigation
+    parent: Any # avoiding circular import with navigation
 
     @abstractmethod
     def links(self) -> list[Link]:
@@ -62,15 +62,24 @@ class HTMLContent(Content):
 
     content: BeautifulSoup
 
-    def links(self) -> list[Link]:
+    def links(self) -> Sequence[Link]:
         links = []
-        for link in self.content.find_all('a', recursive=True):
+        for link in self.content.find_all('a', recursive = True):
             links.append(Link(
                 text = link.get_text(),
                 url = link.get('href'),
                 attrs = link.attrs
             ))
         return links
+    
+    def images(self) -> Sequence[Image]:
+        images = []
+        for image in self.content.find_all('img', recursive = True):
+            images.append(Image(
+                href = image.get('href'),
+                alt_text = image.get('alt') 
+            ))
+        return images
 
     def text(self) -> list[Text]:
         return [] # TODO
@@ -85,6 +94,26 @@ class Link:
     url: str
     attrs: dict[str, str]
 
+
+@dataclass
+class Image:
+    """
+    An image.
+    """
+    href: str
+    alt_text: str
+
+    def get_dimensions():
+        """
+        Get the width and height in pixels.
+        """
+        pass
+
+    def get_size():
+        """
+        Get the size in Megabytes.
+        """
+        pass
 
 @dataclass
 class Text:
