@@ -35,15 +35,17 @@ from ..structure.navigation import NavLevel
 from ..structure.content import Link
 from ..heuristics import links
 from ..heuristics.heuristic import Heuristic, HeuristicTypeException
+from ..heuristics.heuristic import get_heuristics
 
 console = Console(highlight=False, record=True)
+heuristics = get_heuristics('doclint.heuristics.links')
 
 def print_help():
     print("[bold magenta]World[/bold magenta]")
     pass
 
 
-def report(node: NavLevel, output = None):
+def report(node: NavLevel, heuristics:Sequence[type[Heuristic]] ,output = None):
     """
     Lists all the links in the content and adds the results of applying
     link heuristics.
@@ -54,12 +56,11 @@ def report(node: NavLevel, output = None):
     if node.has_children():
         for child in node.children():
             if child is not None:
-                report(child)
+                report(child, heuristics)
     if output:
         html = console.export_html()
         with open(output, 'w', encoding='utf8') as fd:
             fd.write(html)
-
 
 
 def check_links(links: list[Link], parent: NavLevel):
@@ -85,12 +86,7 @@ def check_link(link: Link) -> Tuple[bool, Sequence[type[Heuristic]]]:
     passed (True) or at least one failed (False). The second element is a
     list of identifiers of those heuristics that failed to pass.
     """
-    module = sys.modules['doclint.heuristics.links']
-    classes = [
-        cls[1] for cls in inspect.getmembers(module, inspect.isclass)
-        if cls[0] != 'Heuristic'
-    ]
-    heuristics = [cls for cls in classes if issubclass(cls, Heuristic)]
+    
     passes: bool = True
     failures: list[type[Heuristic]] = []
     for heuristic in heuristics:
@@ -99,6 +95,7 @@ def check_link(link: Link) -> Tuple[bool, Sequence[type[Heuristic]]]:
             passes = False
             failures.append(heuristic)
     return (passes, failures)
+
 
 def get_path(node: NavLevel):
     """

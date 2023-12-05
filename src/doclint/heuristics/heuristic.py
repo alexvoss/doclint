@@ -30,6 +30,9 @@ of being hard-coded into reports.
 """
 
 from __future__ import annotations
+
+import sys, inspect
+
 from abc import ABC, abstractmethod
 from typing import Any, Sequence
 
@@ -102,3 +105,15 @@ class HeuristicTypeException(Exception):
         super().__init__(
             f"Heuristic {cls.identifier()} does not apply to {type(item)}"
         )
+
+def get_heuristics(modulename: str):
+    """
+    Find all the Heuristics in the module with the given module path.
+    """
+    module = sys.modules[modulename]
+    classes = [
+        cls[1] for cls in inspect.getmembers(module, inspect.isclass)
+        if cls[0] != 'Heuristic'
+    ]
+    heuristics = [cls for cls in classes if issubclass(cls, Heuristic)]
+    return heuristics
