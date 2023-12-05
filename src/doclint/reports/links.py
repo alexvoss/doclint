@@ -45,7 +45,7 @@ def print_help():
     pass
 
 
-def report(node: NavLevel, heuristics:Sequence[type[Heuristic]] ,output = None):
+def report(node: NavLevel, output = None):
     """
     Lists all the links in the content and adds the results of applying
     link heuristics.
@@ -56,7 +56,7 @@ def report(node: NavLevel, heuristics:Sequence[type[Heuristic]] ,output = None):
     if node.has_children():
         for child in node.children():
             if child is not None:
-                report(child, heuristics)
+                report(child)
     if output:
         html = console.export_html()
         with open(output, 'w', encoding='utf8') as fd:
