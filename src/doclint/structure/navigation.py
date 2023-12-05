@@ -80,6 +80,12 @@ class NavLevel(ABC):
         Returns a list of Content objects, empty list if there are none.
         """
 
+    def get_depth(self) -> int:
+        """
+        Return the depth of navigation that this node sits at.
+        """
+        return 1 + self.parent.get_depth() if self.parent is not None else 0
+
     def get_path(self):
         """
         Print the path to this navigation node.

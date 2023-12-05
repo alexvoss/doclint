@@ -18,6 +18,19 @@
             "justMyCode": true
         },
         {
+            "name": "doclint navstructure",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/main.py",
+            "args": [
+                "-t", "openedx",
+                "-d", "tests/system/olx/test1",
+                "-o", "output",
+                "navstructure"],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
             "name": "doclint -h",
             "type": "python",
             "request": "launch",

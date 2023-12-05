@@ -23,7 +23,48 @@
 # =============================================================================
 
 """
-Report that lists the navigation structure and applies checks like for
-a maximum allowed depth.
+Report on the navigation structure.
 """
 from rich.console import Console
+
+from ..structure.navigation import NavLevel
+from ..heuristics.heuristic import Heuristic, HeuristicTypeException
+from ..heuristics.heuristic import get_heuristics
+from ..heuristics import navigation
+
+console = Console(highlight= False, record=True)
+heuristics = get_heuristics('doclint.heuristics.navigation')
+
+def print_help():
+    print("[bold magenta]World[/bold magenta]")
+    pass
+
+def report(node: NavLevel, output = None):
+    """
+    Report that lists the navigation structure and applies checks such as for
+    a maximum allowed depth or the maximum allowed number of elements at each
+    level.
+    """
+    check_navlevel(node)
+    if node.has_children():
+        for child in node.children():
+            if child is not None:
+                report(child)
+    
+    if output is not None:
+        html = console.export_html()
+        with open(output, 'w', encoding = 'utf8') as fd:
+            fd.write(html)
+
+def check_navlevel(node) -> None:
+    """
+    Run heuristics on the given navigation level and write results to the
+    console.
+    """
+    console.print(f"[magenta]{node.get_path()}[/magenta]")
+    for heuristic in heuristics:
+        passes_this = heuristic.passes(node)
+        if not passes_this:
+            console.print(f"❌ {heuristic.identifier()}")
+            console.print(f"[red]{heuristic.description()}[/red]")
+    
