@@ -31,6 +31,7 @@ of being hard-coded into reports.
 
 from __future__ import annotations
 from abc import ABC, abstractmethod
+from typing import Any, Sequence
 
 BASEURL = "https://corealisation.github.io/doclint/heuristics/"
 
@@ -41,9 +42,30 @@ class Heuristic(ABC):
     a generic `passes()` method that returns a pass/fail result.
     """
 
-    identifier: str
-    description: str
-    url: str
+    @classmethod
+    @abstractmethod
+    def identifier(cls) -> str:
+        """
+        Return an identifier for this heuristic
+        """
+
+    @classmethod
+    def description(cls) -> str:
+        """
+        Return a human-readable description. Default implementation
+        returns the class's docstring.
+        """
+        if cls.__doc__ is not None:
+            return cls.__doc__
+        else:
+            return "No description available."
+
+    @classmethod
+    def url(cls) -> str:
+        """
+        Return the URL for the documentation of this heuristic.
+        """
+        return BASEURL+cls.identifier()
 
     @classmethod
     @abstractmethod
@@ -54,7 +76,7 @@ class Heuristic(ABC):
 
     @classmethod
     @abstractmethod
-    def applies_to_types(cls) -> bool:
+    def applies_to_types(cls) -> Sequence[type]:
         """
         Returns a list of types the heuristic can be applied to.
         """
@@ -70,16 +92,13 @@ class Heuristic(ABC):
         `item`.
         """
 
-    @classmethod
-    def url(cls) -> str:
-        """
-        Return the URL for the documentation of this heuristic.
-        """
-        return BASEURL+cls.identifier
-
 class HeuristicTypeException(Exception):
     """
     Exception thrown when a Heuristic cannot be applied to the `item` provided
     by its `passes()` method.
     """
-    pass
+
+    def __init__(self, cls: type[Heuristic], item: Any) -> None:
+        super().__init__(
+            f"Heuristic {cls.identifier()} does not apply to {type(item)}"
+        )

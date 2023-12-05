@@ -68,13 +68,13 @@ def import_reports() -> dict:
         reports[report_file.stem] = report_file
     return reports
 
-def import_hooks() -> list:
+def import_hooks() -> dict:
     """
     Hooks augment the tool by implementing specific callback functions.
     """
     # TODO: implement, this will be slightly different from the other ones
     # hooks = find_python_files([get_hooks_path()])
-    return []
+    return {}
 
 
 def get_install_path() -> Path:
@@ -84,7 +84,7 @@ def get_install_path() -> Path:
     path = Path(inspect.getfile(get_install_path)).parent.parent
     return path
 
-def get_hooks_path() -> Path:
+def get_hooks_path() -> Path | None:
     """
     Return the path to the user-configurable hooks. This is controlled by a
     command-line argument so we do not execute random Python files.

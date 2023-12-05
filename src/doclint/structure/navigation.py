@@ -30,7 +30,8 @@ Supports navigation up and down the hierarchy but not between siblings.
 from __future__ import annotations
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from doclint.structure import content
+from typing import Sequence
+from doclint.structure.content import Content
 
 @dataclass(kw_only=True)
 class NavLevel(ABC):
@@ -44,8 +45,8 @@ class NavLevel(ABC):
     only ever appears in leaf nodes, in which case the content lists higher
     up in the tree will simply be empty.
     """
-    name: str         # human-readable name
-    parent: NavLevel  # None if root of the hierarchy
+    name: str | None         # human-readable name
+    parent: NavLevel | None  # None if root of the hierarchy
 
     @abstractmethod
     def is_root(self) -> bool:
@@ -73,7 +74,8 @@ class NavLevel(ABC):
         Returns true if there is content attached to this node, False otherwise.
         """
 
-    def content(self) -> content.Content:
+    @abstractmethod
+    def content(self) -> Sequence[Content]:
         """
         Returns a list of Content objects, empty list if there are none.
         """

@@ -83,7 +83,7 @@ class Link:
     """
     text: str
     url: str
-    attrs: dict[str]
+    attrs: dict[str, str]
 
 
 @dataclass

@@ -28,6 +28,7 @@ Report that checks links - link text, URL and attributes.
 
 import inspect
 import sys
+from typing import Sequence, Tuple
 
 from rich.console import Console
 from ..structure.navigation import NavLevel
@@ -75,10 +76,10 @@ def check_links(links: list[Link], parent: NavLevel):
         else:
             console.print(f"❌ {link.text} -> {link.url}")
             for failure in failures:
-                console.print(f"   [red]{failure.identifier}: {failure.description}[/red]")
+                console.print(f"   [red]{failure.identifier()}: {failure.description()}[/red]")
 
 
-def check_link(link: Link) -> (bool, list[str]):
+def check_link(link: Link) -> Tuple[bool, Sequence[type[Heuristic]]]:
     """
     Returns a tuple with the first element indicating if all heuristics
     passed (True) or at least one failed (False). The second element is a
@@ -91,12 +92,12 @@ def check_link(link: Link) -> (bool, list[str]):
     ]
     heuristics = [cls for cls in classes if issubclass(cls, Heuristic)]
     passes: bool = True
-    failures: list[str] = []
-    for h in heuristics:
-        (passes_this, failures_this) = h.passes(link)
+    failures: list[type[Heuristic]] = []
+    for heuristic in heuristics:
+        passes_this = heuristic.passes(link)
         if not passes_this:
             passes = False
-            failures.append(failures_this)
+            failures.append(heuristic)
     return (passes, failures)
 
 def get_path(node: NavLevel):

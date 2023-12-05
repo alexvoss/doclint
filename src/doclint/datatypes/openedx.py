@@ -31,6 +31,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Sequence
 
 from bs4 import BeautifulSoup
 from lxml import etree
@@ -50,7 +51,7 @@ class Course(NavLevel):
     """
     url_name: str
     org: str
-    chapters: list[Chapter]
+    chapters: Sequence[Chapter]
 
     def is_root(self) -> bool:
         return True
@@ -58,7 +59,7 @@ class Course(NavLevel):
     def has_children(self) -> bool:
         return len(self.chapters) > 0
 
-    def children(self) -> list[NavLevel]:
+    def children(self) -> Sequence[NavLevel]:
         return self.chapters
 
     def has_content(self) -> bool:
@@ -98,7 +99,11 @@ class Course(NavLevel):
         for child in root.getchildren():
             if child.tag == 'chapter':
                 chap_url_name = child.attrib['url_name']
-                chapter = Chapter.read(datadir, chap_url_name, self)
+                chapter = Chapter.read(
+                    datadir = datadir,
+                    url_name = chap_url_name,
+                    parent = self
+                )
                 chapters.append(chapter)
 
         return chapters
@@ -117,15 +122,16 @@ class Chapter(NavLevel):
     def has_children(self) -> bool:
         return len(self.sequentials) > 0
 
-    def children(self) -> list[NavLevel]:
+    def children(self) -> Sequence[NavLevel]:
         return self.sequentials
 
     def has_content(self) -> bool:
         return False
 
-    def content(self) -> list[Content]:
+    def content(self) -> Sequence[Content]:
         return []
 
+    @staticmethod
     def read(datadir: Path, url_name: str, parent: Course) -> Chapter:
         """
         Read the chapter definition for a chapter given by the `url_name`
@@ -160,15 +166,16 @@ class Sequential(NavLevel):
     def has_children(self) -> bool:
         return len(self.verticals) > 0
 
-    def children(self) -> list[NavLevel]:
+    def children(self) -> Sequence[NavLevel]:
         return self.verticals
 
     def has_content(self) -> bool:
         return False
 
-    def content(self) -> list[Content]:
+    def content(self) -> Sequence[Content]:
         return []
 
+    @staticmethod
     def read(datadir: Path, url_name: str, parent: Chapter) -> Sequential:
         """
         Read a Sequential from disk.
@@ -210,6 +217,7 @@ class Vertical(NavLevel):
     def content(self) -> list[Content]:
         return []
 
+    @staticmethod
     def read(datadir: Path, url_name: str, parent: Sequential) -> Vertical:
         """
         Read a vertical from disk.
@@ -233,12 +241,13 @@ class Vertical(NavLevel):
 
         return vertical
 
+    @staticmethod
     def read_element(
         datadir: Path,
         url_name: str,
         tagname: str,
         parent: Vertical
-        ) -> HTMLUnit | Discussion | Video | Problem:
+        ) -> HTMLUnit | Discussion | Video | Problem | None:
         """
         Depending on the specific type of element that is to be read,
         dispatches to a method to read that specific element type.
@@ -261,7 +270,7 @@ class HTMLUnit(NavLevel):
     in the navigation structure, so does not have any children but ony
     content.
     """
-    html: HTMLContent
+    html: list[HTMLContent]
 
     def is_root(self) -> bool:
         return False
@@ -275,10 +284,10 @@ class HTMLUnit(NavLevel):
     def has_content(self) -> bool:
         return True
 
-    def content(self) -> Content:
+    def content(self) -> Sequence[Content]:
         return self.html
 
-
+    @staticmethod
     def read(datadir: Path, url_name: str, parent: Vertical) -> HTMLUnit:
         """
         Read a Unit, comprising its metadata and HTML content

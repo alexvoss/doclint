@@ -27,6 +27,7 @@ Heuristics for Links.
 """
 
 import re
+from typing import Any, Sequence
 
 from urllib.parse import urlparse
 from ..structure.content import Link
@@ -34,80 +35,80 @@ from .heuristic import Heuristic, HeuristicTypeException
 
 class CheckLinkText(Heuristic):
     """links should have descriptive link texts, not `here` or `this page`."""
-    description = __doc__
-    identifier = "dl-link-text"
+
+    @classmethod
+    def identifier(cls) -> str:
+        return  "dl-link-text"
 
     @classmethod
     def applies_to(cls, item) -> bool:
         return isinstance(item, Link)
 
     @classmethod
-    def applies_to_types(cls):
+    def applies_to_types(cls) -> Sequence[type]:
         return [Link]
 
     @classmethod
-    def passes(cls, item) -> (bool, str):
+    def passes(cls, item) -> bool:
         if not isinstance(item, Link):
-            raise HeuristicTypeException(
-                f"heuristic {cls.identifier} does not operate on {type(item)}"
-            )
+            raise HeuristicTypeException(cls, item)
 
         link = item
         if re.fullmatch(r"\Where\W", link.text) \
             or re.fullmatch(r"^here$", link.text) \
             or link.text == "this link" \
             or link.text == "this page":
-            return (False, cls)
-        return (True, cls)
+            return False
+        return True
 
 class CheckUrl(Heuristic):
     """URLs need to be valid."""
-    description = __doc__
-    identifier = "dl-link-url-valid"
+
+    @classmethod
+    def identifier(cls) -> str:
+        return "dl-link-url-valid"
 
     @classmethod
     def applies_to(cls, item) -> bool:
         return isinstance(item, Link)
 
     @classmethod
-    def applies_to_types(cls) -> bool:
+    def applies_to_types(cls) -> Sequence[type]:
         return [Link]
 
     @classmethod
-    def passes(cls, item: Link) -> (bool, str):
+    def passes(cls, item: Link) -> bool:
         if not isinstance(item, Link):
-            raise HeuristicTypeException(
-                f"heuristic {cls.identifier} does not operate on {type(item)}"
-            )
+            raise HeuristicTypeException(cls, item)
         link = item
         try:
             urlparse(link.url)
         except ValueError:
-            return (False, cls)
-        return (True, cls)
+            return False
+        return True
 
 class CheckUrlNoSearch(Heuristic):
     """URLs should not point to search results or search engine redirects."""
-    description = __doc__
-    identifier = "dl-link-url-no-search"
+
+    @classmethod
+    def identifier(cls) -> str:
+        return "dl-link-url-no-search"
 
     @classmethod
     def applies_to(cls, item) -> bool:
         return isinstance(item, Link)
 
     @classmethod
-    def applies_to_types(cls) -> bool:
+    def applies_to_types(cls) -> Sequence[type]:
         return [Link]
 
     @classmethod
-    def passes(cls, item: Link) -> (bool, str):
+    def passes(cls, item: Link) -> bool:
         if not isinstance(item, Link):
-            raise HeuristicTypeException(
-                f"heuristic {cls.identifier} does not operate on {type(item)}"
-            )
+            raise HeuristicTypeException(cls, item)
 
         link = item
         if link.url.startswith('https://www.google.com/search') \
             or link.url.startswith('https://www.google.com/url'):
-            return (False, cls)
-        return (True,  cls)
+            return False
+        return True
