@@ -79,3 +79,10 @@ class NavLevel(ABC):
         """
         Returns a list of Content objects, empty list if there are none.
         """
+
+    def get_path(self):
+        """
+        Print the path to this navigation node.
+        """
+        parent_path = self.parent.get_path() if self.parent is not None else ""
+        return parent_path + "/" + str(self.name)

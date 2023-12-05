@@ -69,7 +69,7 @@ def check_links(links: list[Link], parent: NavLevel):
     """
     if len(links) == 0:
         return
-    console.print(f"[magenta]{get_path(parent)}[/magenta]")
+    console.print(f"[magenta]{parent.get_path()}[/magenta]")
     for link in links:
         (success, failures) = check_link(link)
         if success:
@@ -96,10 +96,3 @@ def check_link(link: Link) -> Tuple[bool, Sequence[type[Heuristic]]]:
             failures.append(heuristic)
     return (passes, failures)
 
-
-def get_path(node: NavLevel):
-    """
-    Print the path to the navigation node given.
-    """
-    path = get_path(node.parent) if node.parent is not None else "/"
-    return path + "/" + str(node.name)
