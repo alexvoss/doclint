@@ -31,6 +31,19 @@
             "justMyCode": true
         },
         {
+            "name": "doclint images",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/main.py",
+            "args": [
+                "-t", "openedx",
+                "-d", "tests/system/olx/test1",
+                "-o", "output",
+                "images"],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
             "name": "doclint -h",
             "type": "python",
             "request": "launch",

@@ -76,7 +76,7 @@ class HTMLContent(Content):
         images = []
         for image in self.content.find_all('img', recursive = True):
             images.append(Image(
-                href = image.get('href'),
+                src = image.get('src'),
                 alt_text = image.get('alt') 
             ))
         return images
@@ -100,7 +100,7 @@ class Image:
     """
     An image.
     """
-    href: str
+    src: str
     alt_text: str
 
     def get_dimensions():
