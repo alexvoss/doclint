@@ -71,7 +71,7 @@ def report_level(
                 indent = indent + 1,
                 numbering = _numbering
             )
-        
+   
 def get_content_logo(node: NavLevel):
     """
     Return a sequence of logos for content in the given navigation node.
@@ -83,6 +83,8 @@ def get_content_logo(node: NavLevel):
         match(content):
             case HTMLContent():
                 _icons.append("🗎")
+                if contains_images(content):
+                    _icons.append("🖽")
             case VideoContent():
                 _icons.append("🎥")
             case ProblemContent():
@@ -98,4 +100,5 @@ def get_content_logo(node: NavLevel):
     iconslist = ','.join(_icons)
     return f" {iconslist}"
 
-    
+def contains_images(html: HTMLContent) -> bool:
+    return html.content.find("img") is not None
