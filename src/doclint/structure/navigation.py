@@ -80,6 +80,14 @@ class NavLevel(ABC):
         Returns a list of Content objects, empty list if there are none.
         """
 
+    def include_in_toc(self) -> bool:
+        """
+        Return whether this navigation level is to be included in a table 
+        of contents. Defaults to True, override to set to False or a 
+        computed value.
+        """
+        return True
+
     def get_depth(self) -> int:
         """
         Return the depth of navigation that this node sits at.

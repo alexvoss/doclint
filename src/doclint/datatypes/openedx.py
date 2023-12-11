@@ -36,7 +36,7 @@ from typing import Sequence
 from bs4 import BeautifulSoup
 from lxml import etree
 
-from doclint.structure.content import HTMLContent, Content
+from doclint.structure.content import DiscussionContent, HTMLContent, Content, ProblemContent, UnknownContent, VideoContent
 from doclint.structure.navigation import NavLevel
 
 
@@ -200,22 +200,22 @@ class Vertical(NavLevel):
     """
     A unit, video, etc.
     """
-    elements: list = field(default_factory = list)
+    elements: list[Content] = field(default_factory = list)
 
     def is_root(self) -> bool:
         return False
 
     def has_children(self) -> bool:
-        return len(self.elements) > 0
-
-    def children(self) -> list[NavLevel]:
-        return self.elements
-
-    def has_content(self) -> bool:
         return False
 
-    def content(self) -> list[Content]:
+    def children(self) -> list[NavLevel]:
         return []
+
+    def has_content(self) -> bool:
+        return len(self.elements) > 0
+
+    def content(self) -> list[Content]:
+        return self.elements
 
     @staticmethod
     def read(datadir: Path, url_name: str, parent: Sequential) -> Vertical:
@@ -230,7 +230,7 @@ class Vertical(NavLevel):
         )
 
         vertical.elements = [
-            Vertical.read_element(
+            Vertical.read_content(
                 datadir,
                 element.attrib['url_name'],
                 element.tag,
@@ -242,93 +242,102 @@ class Vertical(NavLevel):
         return vertical
 
     @staticmethod
-    def read_element(
+    def read_content(
         datadir: Path,
         url_name: str,
         tagname: str,
         parent: Vertical
-        ) -> HTMLUnit | Discussion | Video | Problem | None:
+        ) -> HTMLContent | DiscussionContent | VideoContent | ProblemContent | UnknownContent:
         """
         Depending on the specific type of element that is to be read,
         dispatches to a method to read that specific element type.
         """
         match tagname:
             case 'html':
-                return HTMLUnit.read(datadir, url_name, parent)
+                return Vertical.read_html(
+                    datadir = datadir, 
+                    url_name = url_name, 
+                    parent = parent
+                )
             case 'discussion':
-                pass
+                return DiscussionContent(parent = parent)
             case 'video':
-                pass
+                return Vertical.read_video(
+                    datadir = datadir,
+                    url_name = url_name,
+                    parent = parent
+                )
             case 'problem':
-                pass
-        return None
-
-@dataclass
-class HTMLUnit(NavLevel):
-    """
-    An HTMLUnit in Open edX and the HTML it comprises. This is a leaf node
-    in the navigation structure, so does not have any children but ony
-    content.
-    """
-    html: list[HTMLContent]
-
-    def is_root(self) -> bool:
-        return False
-
-    def has_children(self) -> bool:
-        return False
-
-    def children(self) -> list[NavLevel]:
-        return []
-
-    def has_content(self) -> bool:
-        return True
-
-    def content(self) -> Sequence[Content]:
-        return self.html
+                return Vertical.read_problems(
+                    datadir = datadir,
+                    url_name = url_name,
+                    parent = parent
+                )
+            case 'openassessment':
+                return UnknownContent(parent = parent)  # TODO
+            case _:
+                return UnknownContent(parent = parent)
 
     @staticmethod
-    def read(datadir: Path, url_name: str, parent: Vertical) -> HTMLUnit:
+    def read_html(datadir: Path, url_name: str, parent: Vertical) -> HTMLContent:
         """
-        Read a Unit, comprising its metadata and HTML content
+        Read HTML content
         """
         root = parse_xml(datadir.joinpath(f'html/{url_name}.xml'))
         htmlfile = datadir.joinpath(f'html/{url_name}.html')
         with open(htmlfile, 'r', encoding = 'utf-8') as fd:
             soup = BeautifulSoup(fd, features='lxml')
-            unit = HTMLUnit(
-                name = root.attrib['display_name']
-                    if 'display_name' in root.attrib else None,
-                parent = parent,
-                html = []
-            )
-            unit.html.append(HTMLContent(content = soup, parent = unit))
-            return unit
+            return HTMLContent(content = soup, parent = parent)
+
+    @staticmethod
+    def read_video(datadir: Path, url_name: str, parent: Vertical) -> VideoContent:
+        """
+        Read a video content (metadata).
+        """
+        root = parse_xml(datadir.joinpath(f"video/{url_name}.xml"))
+
+        _local = not ('youtube' in root.attrib)
+        _display_name = root.attrib['display_name']
+        _hoster = "youtube" if "youtube" in root.attrib else "unknown"
+        _src = root.attrib['youtube_id_1_0'] if not _local else "local"
+        _transcripts = Vertical.get_video_transcripts(root)
+
+        _video = VideoContent(
+            name = _display_name,
+            local = _local,
+            hoster = _hoster,
+            src = _src,
+            transcripts = _transcripts,
+            parent = parent
+        )       
+        return _video
+    
+    @staticmethod
+    def get_video_transcripts(root):
+        t = type(root)
+        return [child 
+                for child in root.getchildren() 
+                if child.tag == 'transcript'
+        ]
+
+    @staticmethod
+    def read_problems(datadir: Path, url_name: str, parent: Vertical) -> ProblemContent:
+        """
+        Read a ProblemUnit, comprising its metadata and ProblemContent
+        contained within it.   
+        """
+        root = parse_xml(datadir.joinpath(f'problem/{url_name}.xml'))
+        
+        return ProblemContent(
+            name = "TODO",
+            parent = None,
+            type = "",
+            label = ""
+        )
 
 
-@dataclass
-class Video(NavLevel):
-    """
-    A video in Open edX that is not just embedded in a Unit.
-    """
-    content: None # TODO
 
-
-@dataclass
-class Discussion(NavLevel):
-    """
-    A Discusssion
-    """
-    content: None # TODO
-
-
-@dataclass
-class Problem(NavLevel):
-    """
-    A Problem
-    """
-    content: None # TODO
-
+    
 
 # =============================================================================
 # Module functions

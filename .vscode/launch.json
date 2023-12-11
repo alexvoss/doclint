@@ -5,6 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "doclint toc",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/main.py",
+            "args": [
+                "-t", "openedx",
+                "-d", "tests/system/olx/test1",
+                "-o", "output",
+                "toc"],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        },
+        {
             "name": "doclint links",
             "type": "python",
             "request": "launch",

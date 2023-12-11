@@ -122,3 +122,58 @@ class Text:
     a paragraph or even a whole text.
     """
     text: str
+
+@dataclass
+class VideoContent(Content):
+    """
+    A video that is embedded in the content, either locally or hosted on a
+    remote service.
+    """
+
+    name: str
+    local: bool
+    hoster: str
+    src: str
+    transcripts: list[dict[str, str]] # mapping languages to filenames
+    
+    def links(self) -> list[Link]:
+        return []
+    
+    def text(self) -> list[Text]:
+        return []
+    
+@dataclass
+class DiscussionContent(Content):
+    """
+    A discussion 
+    """
+
+    def links(self) -> list[Link]:
+        return []
+    
+    def text(self) -> list[Text]:
+        return []
+
+@dataclass 
+class ProblemContent(Content):
+    """
+    A problem definition.
+    """
+    name: str
+    type: str
+    label: str
+
+    def links(self) -> list[Link]:
+        return []
+    
+    def text(self) -> list[Text]:
+        return []
+    
+@dataclass
+class UnknownContent(Content):
+    
+    def links(self) -> list[Link]:
+        return []
+    
+    def text(self) -> list[Text]:
+        return []
